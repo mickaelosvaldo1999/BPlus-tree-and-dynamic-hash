@@ -1,5 +1,5 @@
 class node:
-    def __init__(self,size,leaf,pointerLeft=0,PointerRight=0):
+    def __init__(self,size,leaf,pointerLeft=0,pointerRight=0):
         self.leaf = leaf
         self.size = size
         self.values = []
@@ -30,20 +30,6 @@ class node:
     
     def appendChild(self,child):
         self.keys.append(child)
-    
-    def verify(self):
-        if self.isLeaf():
-            if len(self.values) < self.size/2:
-                return False
-            else:
-                return True
-        elif self.root:
-            True
-        else:
-            if len(self.keys) == len(self.values) + 1:
-                return True
-            else:
-                return False
     
     def getKeys(self):
         return self.keys.copy()

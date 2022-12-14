@@ -47,37 +47,14 @@ class bPlusTree:
         else:
             #Descendo
             for i in temp.getKeys():
-                for j in i.getValues():
-                    if value == j:
-                        if i.isLeaf():
-                            return self.findNode(i,value)
-                        else:
-                            True
-                            aux = temp.getkeys().find(i)
-                            if aux < len(temp.getkeys() - 1):
-                                return self.findNode(aux+1,value)
-                            else:
-                                 return self.findNode(temp.getkeys()[-1],value)       
-                    elif value < j:
-                        #Verificnado se a chave não está cheia
-                        if i.isFull():
-                            print("Algum nó abaixo ta cheio")
-                            mika = self.splitChild(i)
-                            if i.getKeys() == []:
-                                mika[0].leaf = True
-                                mika[1].leaf = True
-
-                            temp.keys[temp.keys.index(i)] = mika[0]
-                            temp.keys.append(mika[1])
-                            temp.values.append(mika[2])
-                        return self.findNode(i,value)
+                for j in i.getValues():       
                         
-                    elif i == temp.getKeys()[-1]:
+                    if value < j or i == temp.getKeys()[-1]:
                         #Verificnado se a chave não está cheia
                         if i.isFull():
                             print("Algum nó abaixo ta cheio")
                             mika = self.splitChild(i)
-                            if i.getKeys() == []:
+                            if i.isLeaf():
                                 mika[0].leaf = True
                                 mika[1].leaf = True
 
