@@ -26,8 +26,15 @@ class bPlusTree:
 
                 self.root.delKeys()
                 self.root.appendChild(temp[0])
+                
                 self.root.appendChild(temp[1])
                 self.root.values = [temp[2]]
+
+                print("-------------------------")
+                print(temp[1].getValues())
+                print(temp[1].getKeys())
+                print("-------------------------")
+
                 self.root.leaf = False
                 self.insert(value)
                 #Caso normal de inserção
@@ -84,6 +91,7 @@ class bPlusTree:
                             temp.keys.append(mika[1])
                             temp.values.append(mika[2])
                         return self.findNode(temp.keys[-1],value)
+
             print("Algo deu errado")
             print(temp.getValues())
             print(temp.getKeys())
@@ -95,12 +103,9 @@ class bPlusTree:
         aux1.values = temp[:self.default//2]
         aux2 = node(self.default,False)
         aux2.values = temp[self.default//2:]
-        if not page.isLeaf():
-            print("#########################")
-            for i in page.getKeys()[self.default//2:]:
-                aux1.appendChild(i)
-            for i in page.getKeys()[:self.default//2]:
-                aux1.appendChild(i)
+        
+        aux1.keys = page.getKeys()[self.default//2:]
+        aux2.keys = page.getKeys()[:self.default//2]
         #TERMINAR A INSERÇÃO DOS FILHOS
         return aux1,aux2,temp[self.default//2]
             
