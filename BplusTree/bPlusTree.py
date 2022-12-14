@@ -20,7 +20,7 @@ class bPlusTree:
                 #Dividindo Raiz cheia
                 print("Cheio")
                 temp = self.splitChild(self.root)
-                if self.root.getKeys() == []:
+                if self.root.isLeaf():
                     temp[0].leaf = True
                     temp[1].leaf = True
 
@@ -29,11 +29,6 @@ class bPlusTree:
                 
                 self.root.appendChild(temp[1])
                 self.root.values = [temp[2]]
-
-                print("-------------------------")
-                print(temp[1].getValues())
-                print(temp[1].getKeys())
-                print("-------------------------")
 
                 self.root.leaf = False
                 self.insert(value)
@@ -72,13 +67,12 @@ class bPlusTree:
                                 mika[0].leaf = True
                                 mika[1].leaf = True
 
-                            i = mika[0]
+                            temp.keys[temp.keys.index(i)] = mika[0]
                             temp.keys.append(mika[1])
                             temp.values.append(mika[2])
                         return self.findNode(i,value)
                         
                     elif i == temp.getKeys()[-1]:
-                        print("É o maior")
                         #Verificnado se a chave não está cheia
                         if i.isFull():
                             print("Algum nó abaixo ta cheio")
@@ -86,8 +80,8 @@ class bPlusTree:
                             if i.getKeys() == []:
                                 mika[0].leaf = True
                                 mika[1].leaf = True
-        
-                            i.values = mika[0].values
+
+                            temp.keys[temp.keys.index(i)] = mika[0]
                             temp.keys.append(mika[1])
                             temp.values.append(mika[2])
                         return self.findNode(temp.keys[-1],value)
@@ -103,9 +97,9 @@ class bPlusTree:
         aux1.values = temp[:self.default//2]
         aux2 = node(self.default,False)
         aux2.values = temp[self.default//2:]
-        
-        aux1.keys = page.getKeys()[self.default//2:]
-        aux2.keys = page.getKeys()[:self.default//2]
+        #TODO os : estão invertidos, provavelmente é algum problema de append nas keys
+        aux1.keys = page.getKeys()[:self.default//2]
+        aux2.keys = page.getKeys()[self.default//2:]
         #TERMINAR A INSERÇÃO DOS FILHOS
         return aux1,aux2,temp[self.default//2]
             
@@ -131,5 +125,6 @@ class bPlusTree:
                         for j in i:
                             aux += str(j.getValues())
                     print(aux)
+                    print("")
                     break
 
