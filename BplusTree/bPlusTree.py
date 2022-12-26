@@ -7,14 +7,13 @@ class bPlusTree:
         #Por motivos de implementação só podemos aceitar números pares de tamnho de árvore
         if self.default % 2 != 0:
             print("!!blockSize reduced by 1!!")
-            self.default - 1
+            self.default =- 1
         #Cria a raiz
         self.root = node(self.default,True)
         
     def insert(self,value):
         #Verifica se o valor é inteiro e se tem o tamanho adequado
         if type(value) is int and value.__sizeof__() <= 28:
-
             #Verifica se a árvore ainda está na raiz
             if self.root.isFull():
                 #Dividindo Raiz cheia
@@ -34,22 +33,62 @@ class bPlusTree:
                 self.insert(value)
                 #Caso normal de inserção
             else:
-                self.findNode(self.root,value).values.append(value)
+                self.findNode(self.root,value).insert(value)
         else:
             print("FATAL ERROR: VALUE MUST BE AN INTEGER WITH 28 BYTES")
     
 
     def findNode(self,key,value):
-        aux = 0
+
         temp = key
         if temp.isLeaf():
             return temp
         else:
+            #verificando se o ní de baixo não é folha
+            if temp.getKeys()[0].isLeaf():
+                print("---------------- FOLHA ---------------------")
+                for i in temp.getValues():
+                    if value < i or i == temp.getValues()[-1]:
+                        if value > temp.getValues()[-1]:
+                            #Capturando índice de árvore caso ocorra um split
+                            nextPage = temp.keys.index(temp.getKeys()[-1])
+                            #Verificnado se a chave não está cheia
+                            if temp.getKeys()[-1].isFull():
+                                print("Algum nó abaixo ta cheio")
+                                mika = self.splitChild(temp.getKeys()[-1])
+                                if temp.getKeys()[-1].isLeaf():
+                                    mika[0].leaf = True
+                                    mika[1].leaf = True
+
+                                temp.keys[nextPage] = mika[0]
+                                temp.keys.append(mika[1])
+                                temp.insert(mika[2])
+                                return self.findNode(temp,value)
+                            return self.findNode(temp.keys[nextPage],value)
+                        else:
+                            #Capturando índice de árvore caso ocorra um split
+                            nextPage = temp.keys.index(temp.getKeys()[temp.getValues().index(i)])
+                            aux = temp.getKeys()[temp.getValues().index(i)]
+                            #Verificnado se a chave não está cheia
+                            if aux.isFull():
+                                print("Algum nó abaixo ta cheio")
+                                mika = self.splitChild(aux)
+                                if aux.isLeaf():
+                                    mika[0].leaf = True
+                                    mika[1].leaf = True
+
+                                temp.keys[nextPage] = mika[0]
+                                temp.keys.append(mika[1])
+                                temp.insert(mika[2])
+                                return self.findNode(temp,value)
+                            return self.findNode(temp.keys[nextPage],value)
+
             #Descendo
             for i in temp.getKeys():
-                for j in i.getValues():       
-                        
+                for j in i.getValues():        
                     if value < j or i == temp.getKeys()[-1]:
+                        #Capturando índice de árvore caso ocorra um split
+                        nextPage = temp.keys.index(i)
                         #Verificnado se a chave não está cheia
                         if i.isFull():
                             print("Algum nó abaixo ta cheio")
@@ -58,10 +97,12 @@ class bPlusTree:
                                 mika[0].leaf = True
                                 mika[1].leaf = True
 
-                            temp.keys[temp.keys.index(i)] = mika[0]
+                            temp.keys[nextPage] = mika[0]
                             temp.keys.append(mika[1])
-                            temp.values.append(mika[2])
-                        return self.findNode(temp.keys[-1],value)
+                            temp.insert(mika[2])
+                            return self.findNode(temp,value)
+                        return self.findNode(temp.keys[nextPage],value)
+
 
             print("Algo deu errado")
             print(temp.getValues())
