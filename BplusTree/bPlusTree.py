@@ -33,20 +33,151 @@ class bPlusTree:
                 self.insert(value)
                 #Caso normal de inserção
             else:
-                self.findNode(self.root,value).insert(value)
+                self.insertNonFull(self.root,value).insert(value)
         else:
             print("FATAL ERROR: VALUE MUST BE AN INTEGER WITH 28 BYTES")
     
+    def remove(self,value):
+        self.__remove(self.root,value).remove(value)
+    
+    def __remove(self,key,value):
+        temp = key
+        if key.isLeaf():
+            return key
+        else:
+            #verificando se o nó de baixo é folha
+            if temp.getKeys()[0].isLeaf():
+                for i in temp.getValues():
+                    if value < i or i == temp.getValues()[-1]:
+                        if value >= temp.getValues()[-1]:
+                            #Capturando índice de árvore caso ocorra um split
+                            nextPage = temp.keys.index(temp.getKeys()[-1])
+                            #Verificnado se a chave não está vazia
+                            if temp.getKeys()[-1].isEmpty():
+                                print("Algum nó abaixo ta vazio")
+                                mika = self.splitChild(temp.getKeys()[-1])
+                                if temp.getKeys()[-1].isLeaf():
+                                    mika[0].leaf = True
+                                    mika[1].leaf = True
 
-    def findNode(self,key,value):
+                                temp.keys[nextPage] = mika[0]
+                                temp.keys.append(mika[1])
+                                temp.insert(mika[2])
+                                return self.__remove(temp,value)
+                            return self.__remove(temp.keys[nextPage],value)
+                        else:
+                            #Capturando índice de árvore caso ocorra um merge
+                            nextPage = temp.keys.index(temp.getKeys()[temp.getValues().index(i)])
+                            aux = temp.getKeys()[temp.getValues().index(i)]
+                            #Verificnado se a chave não está cheia
+                            if aux.isEmpty():
+                                print("Algum nó abaixo ta cheio")
+                                mika = self.splitChild(aux)
+                                if aux.isLeaf():
+                                    mika[0].leaf = True
+                                    mika[1].leaf = True
 
+                                temp.keys[nextPage] = mika[0]
+                                temp.keys.append(mika[1])
+                                temp.insert(mika[2])
+                                return self.__remove(temp,value)
+                            return self.__remove(temp.keys[nextPage],value)
+
+            #Descendo
+            else:
+                for i in temp.getKeys():
+                    for j in i.getValues():        
+                        if value < j or i == temp.getKeys()[-1]:
+                            #Capturando índice de árvore caso ocorra um merge
+                            nextPage = temp.keys.index(i)
+                            #Verificnado se a chave esta vazia
+                            if i.isEmpty():
+                                print("Algum nó abaixo ta vazio")
+                                mika = self.splitChild(i)
+                                if i.isLeaf():
+                                    mika[0].leaf = True
+                                    mika[1].leaf = True
+
+                                temp.keys[nextPage] = mika[0]
+                                temp.keys.append(mika[1])
+                                temp.insert(mika[2])
+                                return self.__remove(temp,value)
+                            return self.__remove(temp.keys[nextPage],value)
+
+            #Log de erro
+            print("Algo deu errado")
+            print(temp.getValues())
+            print(temp.getKeys())
+            print("------------------")
+
+
+    def mergeChild(self,keyA,keyB):
+        if not keyA.isEmpty() or not keyB.isEmpty():
+            print("ERROR ON MERGING TWO NODES")
+            quit(513)
+        #definindo a maior chave
+        #KeyB é sempre a maior chave
+        if keyB < keyA:
+            aux = keyB
+            keyB = keyA
+            keyA = aux
+
+        keyA.values += keyB.values
+        keyA.keys += keyB.keys
+        
+        return keyA,keyB.getValues()[0]
+
+    def search(self,value):
+        return self.__search(self.root,value)
+    
+    def __search(self,key,value):
+        temp = key
+        if temp.isLeaf():
+            if value in temp.getValues():
+                print("Encontrou!!")
+                return True
+            else:
+                print("Não encontrado")
+                print(key.getValues())
+                return False
+        else:
+            #verificando se o ní de baixo não é folha
+            if temp.getKeys()[0].isLeaf():
+                for i in temp.getValues():
+                    if value < i or i == temp.getValues()[-1]:
+                        
+                        if value >= temp.getValues()[-1]:
+                            #retornando a folha
+                            nextPage = temp.keys.index(temp.getKeys()[-1])
+                            
+                        else:
+                            #retornando a folha
+                            nextPage = temp.keys.index(temp.getKeys()[temp.getValues().index(i)])
+                            
+                        return self.__search(temp.keys[nextPage],value)
+            #Descendo
+            else:
+                for i in temp.getKeys():
+                    for j in i.getValues():        
+                        if value < j or i == temp.getKeys()[-1]:
+                            #Capturando índice de árvore caso ocorra um split
+                            nextPage = temp.keys.index(i)
+                            return self.__search(temp.keys[nextPage],value)
+
+            #Log de erro
+            print("Algo deu errado")
+            print(temp.getValues())
+            print(temp.getKeys())
+            print("------------------")
+
+
+    def insertNonFull(self,key,value):
         temp = key
         if temp.isLeaf():
             return temp
         else:
-            #verificando se o ní de baixo não é folha
+            #verificando se o nó de baixo não é folha
             if temp.getKeys()[0].isLeaf():
-                print("---------------- FOLHA ---------------------")
                 for i in temp.getValues():
                     if value < i or i == temp.getValues()[-1]:
                         if value > temp.getValues()[-1]:
@@ -63,8 +194,8 @@ class bPlusTree:
                                 temp.keys[nextPage] = mika[0]
                                 temp.keys.append(mika[1])
                                 temp.insert(mika[2])
-                                return self.findNode(temp,value)
-                            return self.findNode(temp.keys[nextPage],value)
+                                return self.insertNonFull(temp,value)
+                            return self.insertNonFull(temp.keys[nextPage],value)
                         else:
                             #Capturando índice de árvore caso ocorra um split
                             nextPage = temp.keys.index(temp.getKeys()[temp.getValues().index(i)])
@@ -80,30 +211,31 @@ class bPlusTree:
                                 temp.keys[nextPage] = mika[0]
                                 temp.keys.append(mika[1])
                                 temp.insert(mika[2])
-                                return self.findNode(temp,value)
-                            return self.findNode(temp.keys[nextPage],value)
+                                return self.insertNonFull(temp,value)
+                            return self.insertNonFull(temp.keys[nextPage],value)
 
             #Descendo
-            for i in temp.getKeys():
-                for j in i.getValues():        
-                    if value < j or i == temp.getKeys()[-1]:
-                        #Capturando índice de árvore caso ocorra um split
-                        nextPage = temp.keys.index(i)
-                        #Verificnado se a chave não está cheia
-                        if i.isFull():
-                            print("Algum nó abaixo ta cheio")
-                            mika = self.splitChild(i)
-                            if i.isLeaf():
-                                mika[0].leaf = True
-                                mika[1].leaf = True
+            else:
+                for i in temp.getKeys():
+                    for j in i.getValues():        
+                        if value < j or i == temp.getKeys()[-1]:
+                            #Capturando índice de árvore caso ocorra um split
+                            nextPage = temp.keys.index(i)
+                            #Verificnado se a chave não está cheia
+                            if i.isFull():
+                                print("Algum nó abaixo ta cheio")
+                                mika = self.splitChild(i)
+                                if i.isLeaf():
+                                    mika[0].leaf = True
+                                    mika[1].leaf = True
 
-                            temp.keys[nextPage] = mika[0]
-                            temp.keys.append(mika[1])
-                            temp.insert(mika[2])
-                            return self.findNode(temp,value)
-                        return self.findNode(temp.keys[nextPage],value)
+                                temp.keys[nextPage] = mika[0]
+                                temp.keys.append(mika[1])
+                                temp.insert(mika[2])
+                                return self.insertNonFull(temp,value)
+                            return self.insertNonFull(temp.keys[nextPage],value)
 
-
+            #Log de erro
             print("Algo deu errado")
             print(temp.getValues())
             print(temp.getKeys())

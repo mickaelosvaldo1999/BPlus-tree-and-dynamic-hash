@@ -19,8 +19,20 @@ class node:
             self.values.append(value)
             self.values.sort()
     
+    def remove(self,value):
+            self.values.remove(value)
+            self.values.sort()
+    
     def isFull(self):
         if len(self.values) >= self.size:
+            return True
+        else:
+            return False
+    
+    def isEmpty(self):
+        if len(self.values) <= self.size/2:
+            print(len(self.values))
+            print(self.size/2)
             return True
         else:
             return False
@@ -33,3 +45,15 @@ class node:
     
     def getKeys(self):
         return self.keys.copy()
+
+    def __eq__(self, other):
+        if self.values[0] == other.values[0]:
+            return True
+        else:
+            return False
+    
+    def __lt__(self,other):
+        if self.values[0] < other.values[0]:
+            return True
+        else:
+            return False
