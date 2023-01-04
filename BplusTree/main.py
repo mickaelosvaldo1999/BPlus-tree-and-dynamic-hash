@@ -37,6 +37,6 @@ while True:
 
         else:
             int('ERROR')
-    except:
+    except UnboundLocalError:
         print('ERRO: Formatação ou operação inválida!!!')
         tree.remove(int(input("Digite um inteiro: ")))

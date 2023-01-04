@@ -38,71 +38,123 @@ class bPlusTree:
             print("FATAL ERROR: VALUE MUST BE AN INTEGER WITH 28 BYTES")
     
     def remove(self,value):
-        self.__remove(self.root,value).remove(value)
+        self.__remove(self.root,value).removeValue(value)
     
     def __remove(self,key,value):
         temp = key
-        if key.isLeaf():
-            return key
+        #prevents empty root
+        if self.root.getValues() == []:
+            self.root = self.root.getKeys()[0]
+            self.root.leaf = True
+            return self.root
+
+        #end of recursion
+        if temp.isLeaf():
+            return temp
         else:
-            #verificando se o nó de baixo é folha
+            #Cheking leaf nodes to fix operations issues on structure
             if temp.getKeys()[0].isLeaf():
+                #Detalied analisis on leaf elements
                 for i in temp.getValues():
+                    #possible value found
                     if value < i or i == temp.getValues()[-1]:
-                        if value >= temp.getValues()[-1]:
-                            #Capturando índice de árvore caso ocorra um split
-                            nextPage = temp.keys.index(temp.getKeys()[-1])
-                            #Verificnado se a chave não está vazia
-                            if temp.getKeys()[-1].isEmpty():
-                                print("Algum nó abaixo ta vazio")
-                                mika = self.splitChild(temp.getKeys()[-1])
-                                if temp.getKeys()[-1].isLeaf():
-                                    mika[0].leaf = True
-                                    mika[1].leaf = True
+                        #Picking key indexes
+                        nextPage = temp.keys.index(temp.getKeys()[temp.getValues().index(i)])
+                        #special case in last node
+                        if i == temp.getValues()[-1] and value >= i:
+                            nextPage += 1
 
-                                temp.keys[nextPage] = mika[0]
-                                temp.keys.append(mika[1])
-                                temp.insert(mika[2])
-                                return self.__remove(temp,value)
-                            return self.__remove(temp.keys[nextPage],value)
+                        if temp.getKeys()[nextPage].isEmpty():
+                            #If this element is the first one
+                            if i == temp.getValues()[0] and value < i:
+                                if i == temp.getValues()[0]:
+                                    #Cheking if the right neightbor is empty
+                                    if temp.getKeys()[1].isEmpty():
+                                        #making forced merge
+                                        temp.removeValue(i)
+                                        temp.keys[nextPage] = self.mergeChild(temp.getKeys()[nextPage],temp.getKeys()[nextPage+1])
+                                        temp.removeKey(temp.getKeys()[nextPage+1])
+
+                                        return self.__remove(temp,value)
+                                        
+                                    #stealing the first key to miss the merge
+                                    else:
+
+                                        temp.keys[0].insert(temp.getKeys()[1].getValues()[0])
+                                        temp.keys[1].removeValue(temp.getKeys()[1].getValues()[0])
+                                        temp.insert(temp.getKeys()[1].getValues()[0])
+                                        temp.removeValue(i)
+                                        return self.__remove(temp,value)
+                                    
+                                #Normal elements
+                                else:
+                                    True
+                            #if this element is the last one
+                            elif i == temp.getValues()[-1] and value >= i:
+
+                                if temp.getKeys()[-2].isEmpty():
+                                    #making forced merge
+                                    temp.removeValue(i)
+                                    temp.keys[nextPage] = self.mergeChild(temp.getKeys()[nextPage],temp.getKeys()[nextPage-1])
+                                    temp.removeKey(temp.getKeys()[nextPage-1])
+
+                                    return self.__remove(temp,value)
+                                        
+                                #stealing the first key to miss the merge
+                                else:
+                                    temp.keys[-1].insert(temp.getKeys()[-2].getValues()[-1])
+                                    temp.insert(temp.getKeys()[-2].getValues()[-1])
+                                    temp.keys[-2].removeValue(temp.getKeys()[-2].getValues()[-1])
+                                    temp.removeValue(i)
+                                    return self.__remove(temp,value)
+
+                            #removing elements in the middle of structure
+                            else:
+                                #testing if can miss the merge
+                                if not temp.getKeys()[nextPage + 1].isEmpty():
+
+                                    temp.keys[nextPage].insert(temp.getKeys()[nextPage + 1].getValues()[0])
+                                    temp.keys[nextPage + 1].removeValue(temp.getKeys()[nextPage + 1].getValues()[0])
+                                    temp.insert(temp.getKeys()[nextPage + 1].getValues()[0])
+                                    temp.removeValue(i)
+                                    return self.__remove(temp,value)
+
+                                elif not temp.getKeys()[nextPage - 1].isEmpty():
+                                    temp.keys[nextPage].insert(temp.getKeys()[nextPage - 1].getValues()[-1])
+                                    temp.insert(temp.getKeys()[nextPage - 1].getValues()[-1])
+                                    temp.keys[nextPage - 1].removeValue(temp.getKeys()[nextPage - 1].getValues()[-1])
+                                    temp.removeValue(i)
+                                    return self.__remove(temp,value)
+
+                                
+                                #Forced merge
+                                else:
+                                    #making forced merge
+                                    temp.removeValue(i)
+                                    temp.keys[nextPage] = self.mergeChild(temp.getKeys()[nextPage],temp.getKeys()[nextPage+1])
+                                    temp.removeKey(temp.getKeys()[nextPage+1])
+
+                                    return self.__remove(temp,value)
+                        
                         else:
-                            #Capturando índice de árvore caso ocorra um merge
-                            nextPage = temp.keys.index(temp.getKeys()[temp.getValues().index(i)])
-                            aux = temp.getKeys()[temp.getValues().index(i)]
-                            #Verificnado se a chave não está cheia
-                            if aux.isEmpty():
-                                print("Algum nó abaixo ta cheio")
-                                mika = self.splitChild(aux)
-                                if aux.isLeaf():
-                                    mika[0].leaf = True
-                                    mika[1].leaf = True
-
-                                temp.keys[nextPage] = mika[0]
-                                temp.keys.append(mika[1])
-                                temp.insert(mika[2])
-                                return self.__remove(temp,value)
                             return self.__remove(temp.keys[nextPage],value)
+                        
 
             #Descendo
             else:
                 for i in temp.getKeys():
                     for j in i.getValues():        
                         if value < j or i == temp.getKeys()[-1]:
-                            #Capturando índice de árvore caso ocorra um merge
+                            #Capturando índice de árvore caso ocorra um split
                             nextPage = temp.keys.index(i)
-                            #Verificnado se a chave esta vazia
+                            #Verificnado se a chave não está cheia
                             if i.isEmpty():
-                                print("Algum nó abaixo ta vazio")
-                                mika = self.splitChild(i)
-                                if i.isLeaf():
-                                    mika[0].leaf = True
-                                    mika[1].leaf = True
 
-                                temp.keys[nextPage] = mika[0]
-                                temp.keys.append(mika[1])
-                                temp.insert(mika[2])
-                                return self.__remove(temp,value)
-                            return self.__remove(temp.keys[nextPage],value)
+                                print("folha vazia")
+                            return self.insertNonFull(temp.keys[nextPage],value)
+                        
+
+            #Descendo
 
             #Log de erro
             print("Algo deu errado")
@@ -124,8 +176,7 @@ class bPlusTree:
 
         keyA.values += keyB.values
         keyA.keys += keyB.keys
-        
-        return keyA,keyB.getValues()[0]
+        return keyA
 
     def search(self,value):
         return self.__search(self.root,value)
@@ -180,7 +231,7 @@ class bPlusTree:
             if temp.getKeys()[0].isLeaf():
                 for i in temp.getValues():
                     if value < i or i == temp.getValues()[-1]:
-                        if value > temp.getValues()[-1]:
+                        if value >= temp.getValues()[-1]:
                             #Capturando índice de árvore caso ocorra um split
                             nextPage = temp.keys.index(temp.getKeys()[-1])
                             #Verificnado se a chave não está cheia

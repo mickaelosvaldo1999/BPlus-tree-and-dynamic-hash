@@ -4,6 +4,8 @@ class node:
         self.size = size
         self.values = []
         self.keys = []
+        self.pointerLeft = pointerLeft
+        self.pointerRight = pointerRight
     
     def getValues(self):
         return self.values.copy()
@@ -19,9 +21,14 @@ class node:
             self.values.append(value)
             self.values.sort()
     
-    def remove(self,value):
+    def removeValue(self,value):
             self.values.remove(value)
             self.values.sort()
+    
+    def removeKey(self,key):
+            self.keys.remove(key)
+            self.keys.sort()
+    
     
     def isFull(self):
         if len(self.values) >= self.size:
