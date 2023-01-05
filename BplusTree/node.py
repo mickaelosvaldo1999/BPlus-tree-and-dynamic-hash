@@ -38,8 +38,6 @@ class node:
     
     def isEmpty(self):
         if len(self.values) <= self.size/2:
-            print(len(self.values))
-            print(self.size/2)
             return True
         else:
             return False

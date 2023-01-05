@@ -45,15 +45,14 @@ class bPlusTree:
         #prevents empty root
         if self.root.getValues() == []:
             self.root = self.root.getKeys()[0]
-            self.root.leaf = True
-            return self.root
+            return self.__remove(self.root,value)
 
         #end of recursion
         if temp.isLeaf():
             return temp
         else:
             #Cheking leaf nodes to fix operations issues on structure
-            if temp.getKeys()[0].isLeaf():
+            if True:
                 #Detalied analisis on leaf elements
                 for i in temp.getValues():
                     #possible value found
@@ -67,11 +66,13 @@ class bPlusTree:
                         if temp.getKeys()[nextPage].isEmpty():
                             #If this element is the first one
                             if i == temp.getValues()[0] and value < i:
+                                #remover if
                                 if i == temp.getValues()[0]:
                                     #Cheking if the right neightbor is empty
                                     if temp.getKeys()[1].isEmpty():
                                         #making forced merge
                                         temp.removeValue(i)
+                                        self.print()
                                         temp.keys[nextPage] = self.mergeChild(temp.getKeys()[nextPage],temp.getKeys()[nextPage+1])
                                         temp.removeKey(temp.getKeys()[nextPage+1])
 
@@ -86,12 +87,9 @@ class bPlusTree:
                                         temp.removeValue(i)
                                         return self.__remove(temp,value)
                                     
-                                #Normal elements
-                                else:
-                                    True
+                                
                             #if this element is the last one
                             elif i == temp.getValues()[-1] and value >= i:
-
                                 if temp.getKeys()[-2].isEmpty():
                                     #making forced merge
                                     temp.removeValue(i)
@@ -139,22 +137,6 @@ class bPlusTree:
                         else:
                             return self.__remove(temp.keys[nextPage],value)
                         
-
-            #Descendo
-            else:
-                for i in temp.getKeys():
-                    for j in i.getValues():        
-                        if value < j or i == temp.getKeys()[-1]:
-                            #Capturando índice de árvore caso ocorra um split
-                            nextPage = temp.keys.index(i)
-                            #Verificnado se a chave não está cheia
-                            if i.isEmpty():
-
-                                print("folha vazia")
-                            return self.insertNonFull(temp.keys[nextPage],value)
-                        
-
-            #Descendo
 
             #Log de erro
             print("Algo deu errado")
